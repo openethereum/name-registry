@@ -1,3 +1,7 @@
+//! Owned contract.
+//! By Gav Wood (Ethcore), 2016.
+//! Released under the Apache Licence 2.
+
 contract Owned {
     modifier only_owner { if (msg.sender != owner) return; _ }
     
