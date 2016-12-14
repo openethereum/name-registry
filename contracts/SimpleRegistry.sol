@@ -30,7 +30,7 @@ contract OwnerRegistry {
 
 	function getOwner(bytes32 _name) constant returns (address);
 }
-contract ReversibleRegistry {
+contract ReverseRegistry {
 	event ReverseConfirmed(string indexed name, address indexed reverse);
 	event ReverseRemoved(string indexed name, address indexed reverse);
 
@@ -40,21 +40,12 @@ contract ReversibleRegistry {
 	function reverse(address _data) constant returns (string);
 }
 
-contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReversibleRegistry {
+contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegistry {
 	struct Entry {
 		address owner;
 		address reverse;
 		mapping (string => bytes32) data;
 	}
-
-	event Reserved(bytes32 indexed name, address indexed owner);
-	event Transferred(bytes32 indexed name, address indexed oldOwner, address indexed newOwner);
-	event Dropped(bytes32 indexed name, address indexed owner);
-
-	event DataChanged(bytes32 indexed name, string indexed key, string plainKey);
-
-	event ReverseConfirmed(string indexed name, address indexed reverse);
-	event ReverseRemoved(string indexed name, address indexed reverse);
 
 	event Drained(uint amount);
 	event FeeChanged(uint amount);
@@ -98,6 +89,7 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReversibleReg
 	}
 
 	function drop(bytes32 _name) only_owner_of(_name) returns (bool success) {
+		delete reverses[entries[_name].reverse];
 		delete entries[_name];
 		Dropped(_name, msg.sender);
 		return true;
@@ -148,14 +140,16 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReversibleReg
 
 	// Admin functions for the owner.
 
-	function setFee(uint _amount) only_owner {
+	function setFee(uint _amount) only_owner returns (bool) {
 		fee = _amount;
 		FeeChanged(_amount);
+		return true;
 	}
 
-	function drain() only_owner {
+	function drain() only_owner returns (bool) {
 		Drained(this.balance);
 		if (!msg.sender.send(this.balance)) throw;
+		return true;
 	}
 
 	modifier when_unreserved(bytes32 _name) { if (entries[_name].owner != 0) return; _; }
