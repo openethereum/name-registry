@@ -5,10 +5,10 @@
 pragma solidity ^0.4.0;
 
 contract Certifier {
-    event Confirmed(address indexed who);
-    event Revoked(address indexed who);
-    function certified(address _who) constant returns (bool);
-    function get(address _who, string _field) constant returns (bytes32) {}
-    function getAddress(address _who, string _field) constant returns (address) {}
-    function getUint(address _who, string _field) constant returns (uint) {}
+	event Confirmed(address indexed who);
+	event Revoked(address indexed who);
+	function certified(address _who) constant returns (bool);
+	function get(address _who, string _field) constant returns (bytes32) {}
+	function getAddress(address _who, string _field) constant returns (address) {}
+	function getUint(address _who, string _field) constant returns (uint) {}
 }
