@@ -132,6 +132,12 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 		return true;
 	}
 
+	function confirmReverseAs(string _name, address _who) when_proposed(_name) returns (bool success) {
+		reverses[_who] = _name;
+		ReverseConfirmed(_name, _who);
+		return true;
+	}
+
 	function removeReverse() {
 		ReverseRemoved(reverses[msg.sender], msg.sender);
 		delete entries[sha3(reverses[msg.sender])].reverse;
