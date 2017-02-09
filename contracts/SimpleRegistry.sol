@@ -132,7 +132,7 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 		return true;
 	}
 
-	function confirmReverseAs(string _name, address _who) when_proposed(_name) returns (bool success) {
+	function confirmReverseAs(string _name, address _who) only_owner returns (bool success) {
 		reverses[_who] = _name;
 		ReverseConfirmed(_name, _who);
 		return true;
