@@ -1,5 +1,5 @@
 //! SimpleCertifier contract, taken from paritytech/sms-verification
-//! By Gav Wood (Ethcore), 2016.
+//! By Gav Wood (Parity Technologies), 2016.
 //! Released under the Apache Licence 2.
 
 pragma solidity ^0.4.7;
