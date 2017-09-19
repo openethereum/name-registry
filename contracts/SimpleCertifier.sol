@@ -1,4 +1,4 @@
-//! SimpleCertifier contract, taken from ethcore/sms-verification
+//! SimpleCertifier contract, taken from paritytech/sms-verification
 //! By Gav Wood (Ethcore), 2016.
 //! Released under the Apache Licence 2.
 
