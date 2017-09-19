@@ -5,7 +5,7 @@
 pragma solidity ^0.4.6;
 
 contract Owned {
-    modifier only_owner { if (msg.sender != owner) return; _; }
+    modifier only_owner { require (msg.sender == owner); _; }
 
     event NewOwner(address indexed old, address indexed current);
 
@@ -13,4 +13,3 @@ contract Owned {
 
     address public owner = msg.sender;
 }
-
