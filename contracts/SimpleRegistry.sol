@@ -4,16 +4,7 @@
 
 pragma solidity ^0.4.0;
 
-// From Owned.sol
-contract Owned {
-	event NewOwner(address indexed old, address indexed current);
-
-	function setOwner(address _new) only_owner { NewOwner(owner, _new); owner = _new; }
-
-	modifier only_owner { if (msg.sender != owner) return; _; }
-
-	address public owner = msg.sender;
-}
+import "Owned.sol";
 
 // From Registry.sol
 contract MetadataRegistry {

@@ -4,26 +4,8 @@
 
 pragma solidity ^0.4.7;
 
-// From Owned.sol
-contract Owned {
-	modifier only_owner { if (msg.sender != owner) return; _; }
-
-	event NewOwner(address indexed old, address indexed current);
-
-	function setOwner(address _new) only_owner { NewOwner(owner, _new); owner = _new; }
-
-	address public owner = msg.sender;
-}
-
-// From Certifier.sol
-contract Certifier {
-	event Confirmed(address indexed who);
-	event Revoked(address indexed who);
-	function certified(address _who) constant returns (bool);
-	function get(address _who, string _field) constant returns (bytes32) {}
-	function getAddress(address _who, string _field) constant returns (address) {}
-	function getUint(address _who, string _field) constant returns (uint) {}
-}
+import "Owned.sol";
+import "Certifier.sol";
 
 contract SimpleCertifier is Owned, Certifier {
 	modifier only_delegate { if (msg.sender != delegate) return; _; }
