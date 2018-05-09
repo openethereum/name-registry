@@ -52,6 +52,7 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 	struct Entry {
 		address owner;
 		address reverse;
+		bool deleted;
 		mapping (string => bytes32) data;
 	}
 
@@ -60,29 +61,29 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 	event ReverseProposed(string indexed name, address indexed reverse);
 
 	// Registry functions.
-	function getData(bytes32 _name, string _key) view public returns (bytes32) {
+	function getData(bytes32 _name, string _key) whenEntryRaw(_name) view public returns (bytes32) {
 		return entries[_name].data[_key];
 	}
 
-	function getAddress(bytes32 _name, string _key) view public returns (address) {
+	function getAddress(bytes32 _name, string _key) whenEntryRaw(_name) view public returns (address) {
 		return address(entries[_name].data[_key]);
 	}
 
-	function getUint(bytes32 _name, string _key) view public returns (uint) {
+	function getUint(bytes32 _name, string _key) whenEntryRaw(_name) view public returns (uint) {
 		return uint(entries[_name].data[_key]);
 	}
 
 	// OwnerRegistry function.
-	function getOwner(bytes32 _name) view public returns (address) {
+	function getOwner(bytes32 _name) whenEntryRaw(_name) view public returns (address) {
 		return entries[_name].owner;
 	}
 
 	// ReversibleRegistry functions.
-	function hasReverse(bytes32 _name) view public returns (bool) {
+	function hasReverse(bytes32 _name) whenEntryRaw(_name) view public returns (bool) {
 		return entries[_name].reverse != 0;
 	}
 
-	function getReverse(bytes32 _name) view public returns (address) {
+	function getReverse(bytes32 _name) whenEntryRaw(_name) view public returns (address) {
 		return entries[_name].reverse;
 	}
 
@@ -95,50 +96,50 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 	}
 
 	// Reservation functions.
-	function reserve(bytes32 _name) whenUnreserved(_name) whenFeePaid payable public returns (bool success) {
+	function reserve(bytes32 _name) whenEntryRaw(_name) whenUnreserved(_name) whenFeePaid payable public returns (bool success) {
 		entries[_name].owner = msg.sender;
 		emit Reserved(_name, msg.sender);
 		return true;
 	}
 
-	function reserved(bytes32 _name) view public returns (bool) {
+	function reserved(bytes32 _name) whenEntryRaw(_name) view public returns (bool) {
 		return entries[_name].owner != 0;
 	}
 
-	function transfer(bytes32 _name, address _to) onlyOwnerOf(_name) public returns (bool success) {
+	function transfer(bytes32 _name, address _to) whenEntryRaw(_name) onlyOwnerOf(_name) public returns (bool success) {
 		entries[_name].owner = _to;
 		emit Transferred(_name, msg.sender, _to);
 		return true;
 	}
 
-	function drop(bytes32 _name) onlyOwnerOf(_name) public returns (bool success) {
+	function drop(bytes32 _name) whenEntryRaw(_name) onlyOwnerOf(_name) public returns (bool success) {
 		delete reverses[entries[_name].reverse];
-		delete entries[_name];
+		entries[_name].deleted = true;
 		emit Dropped(_name, msg.sender);
 		return true;
 	}
 
 	// Data admin functions.
-	function setData(bytes32 _name, string _key, bytes32 _value) onlyOwnerOf(_name) public returns (bool success) {
+	function setData(bytes32 _name, string _key, bytes32 _value) whenEntryRaw(_name) onlyOwnerOf(_name) public returns (bool success) {
 		entries[_name].data[_key] = _value;
 		emit DataChanged(_name, _key, _key);
 		return true;
 	}
 
-	function setAddress(bytes32 _name, string _key, address _value) onlyOwnerOf(_name) public returns (bool success) {
+	function setAddress(bytes32 _name, string _key, address _value) whenEntryRaw(_name) onlyOwnerOf(_name) public returns (bool success) {
 		entries[_name].data[_key] = bytes32(_value);
 		emit DataChanged(_name, _key, _key);
 		return true;
 	}
 
-	function setUint(bytes32 _name, string _key, uint _value) onlyOwnerOf(_name) public returns (bool success) {
+	function setUint(bytes32 _name, string _key, uint _value) whenEntryRaw(_name) onlyOwnerOf(_name) public returns (bool success) {
 		entries[_name].data[_key] = bytes32(_value);
 		emit DataChanged(_name, _key, _key);
 		return true;
 	}
 
 	// Reverse registration.
-	function proposeReverse(string _name, address _who) onlyOwnerOf(keccak256(_name)) public returns (bool success) {
+	function proposeReverse(string _name, address _who) whenEntry(_name) onlyOwnerOf(keccak256(_name)) public returns (bool success) {
 		bytes32 sha3Name = keccak256(_name);
 		if (entries[sha3Name].reverse != 0 && keccak256(reverses[entries[sha3Name].reverse]) == sha3Name) {
 			delete reverses[entries[sha3Name].reverse];
@@ -149,19 +150,19 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 		return true;
 	}
 
-	function confirmReverse(string _name) whenProposed(_name) public returns (bool success) {
+	function confirmReverse(string _name) whenEntry(_name) whenProposed(_name) public returns (bool success) {
 		reverses[msg.sender] = _name;
 		emit ReverseConfirmed(_name, msg.sender);
 		return true;
 	}
 
-	function confirmReverseAs(string _name, address _who) onlyOwner public returns (bool success) {
+	function confirmReverseAs(string _name, address _who) whenEntry(_name) onlyOwner public returns (bool success) {
 		reverses[_who] = _name;
 		emit ReverseConfirmed(_name, _who);
 		return true;
 	}
 
-	function removeReverse() public {
+	function removeReverse() whenEntry(reverses[msg.sender]) public {
 		emit ReverseRemoved(reverses[msg.sender], msg.sender);
 		delete entries[keccak256(reverses[msg.sender])].reverse;
 		delete reverses[msg.sender];
@@ -181,26 +182,32 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 	}
 
 	modifier whenUnreserved(bytes32 _name) {
-		if (entries[_name].owner != 0)
-			return;
+		require(entries[_name].owner == 0);
 		_;
 	}
 
 	modifier onlyOwnerOf(bytes32 _name) {
-		if (entries[_name].owner != msg.sender)
-			return;
+		require(entries[_name].owner == msg.sender);
 		_;
 	}
 
 	modifier whenProposed(string _name) {
-		if (entries[keccak256(_name)].reverse != msg.sender)
-			return;
+		require(entries[keccak256(_name)].reverse == msg.sender);
+		_;
+	}
+
+	modifier whenEntry(string _name) {
+		require(!entries[keccak256(_name)].deleted);
+		_;
+	}
+
+	modifier whenEntryRaw(bytes32 _name) {
+		require(!entries[_name].deleted);
 		_;
 	}
 
 	modifier whenFeePaid {
-		if (msg.value < fee)
-			return;
+		require(msg.value >= fee);
 		_;
 	}
 

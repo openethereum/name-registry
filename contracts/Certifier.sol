@@ -21,7 +21,6 @@ contract Certifier {
 	event Confirmed(address indexed who);
 	event Revoked(address indexed who);
 	function certified(address _who) view public returns (bool);
-	function getData(address _who, string _field) view public returns (bytes32) {}
-	function getAddress(address _who, string _field) view public returns (address) {}
-	function getUint(address _who, string _field) view public returns (uint) {}
+	function getAddress(address _who, string _field) view public returns (address);
+	function getUint(address _who, string _field) view public returns (uint);
 }
