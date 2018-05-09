@@ -18,30 +18,35 @@ pragma solidity ^0.4.0;
 
 import "./Owned.sol";
 
-// From Registry.sol
+
 contract MetadataRegistry {
 	event DataChanged(bytes32 indexed name, string indexed key, string plainKey);
 
-	function getData(bytes32 _name, string _key) constant returns (bytes32);
-	function getAddress(bytes32 _name, string _key) constant returns (address);
-	function getUint(bytes32 _name, string _key) constant returns (uint);
+	function getData(bytes32 _name, string _key) view public returns (bytes32);
+	function getAddress(bytes32 _name, string _key) view public returns (address);
+	function getUint(bytes32 _name, string _key) view public returns (uint);
 }
+
+
 contract OwnerRegistry {
 	event Reserved(bytes32 indexed name, address indexed owner);
 	event Transferred(bytes32 indexed name, address indexed oldOwner, address indexed newOwner);
 	event Dropped(bytes32 indexed name, address indexed owner);
 
-	function getOwner(bytes32 _name) constant returns (address);
+	function getOwner(bytes32 _name) view public returns (address);
 }
+
+
 contract ReverseRegistry {
 	event ReverseConfirmed(string indexed name, address indexed reverse);
 	event ReverseRemoved(string indexed name, address indexed reverse);
 
-	function hasReverse(bytes32 _name) constant returns (bool);
-	function getReverse(bytes32 _name) constant returns (address);
-	function canReverse(address _data) constant returns (bool);
-	function reverse(address _data) constant returns (string);
+	function hasReverse(bytes32 _name) view public returns (bool);
+	function getReverse(bytes32 _name) view public returns (address);
+	function canReverse(address _data) view public returns (bool);
+	function reverse(address _data) view public returns (string);
 }
+
 
 contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegistry {
 	struct Entry {
@@ -55,116 +60,149 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 	event ReverseProposed(string indexed name, address indexed reverse);
 
 	// Registry functions.
-	function getData(bytes32 _name, string _key) constant returns (bytes32) {
+	function getData(bytes32 _name, string _key) view public returns (bytes32) {
 		return entries[_name].data[_key];
 	}
-	function getAddress(bytes32 _name, string _key) constant returns (address) {
+
+	function getAddress(bytes32 _name, string _key) view public returns (address) {
 		return address(entries[_name].data[_key]);
 	}
-	function getUint(bytes32 _name, string _key) constant returns (uint) {
+
+	function getUint(bytes32 _name, string _key) view public returns (uint) {
 		return uint(entries[_name].data[_key]);
 	}
 
 	// OwnerRegistry function.
-	function getOwner(bytes32 _name) constant returns (address) { return entries[_name].owner; }
+	function getOwner(bytes32 _name) view public returns (address) {
+		return entries[_name].owner;
+	}
 
 	// ReversibleRegistry functions.
-	function hasReverse(bytes32 _name) constant returns (bool) { return entries[_name].reverse != 0; }
-	function getReverse(bytes32 _name) constant returns (address) { return entries[_name].reverse; }
-	function canReverse(address _data) constant returns (bool) { return bytes(reverses[_data]).length != 0; }
-	function reverse(address _data) constant returns (string) { return reverses[_data]; }
+	function hasReverse(bytes32 _name) view public returns (bool) {
+		return entries[_name].reverse != 0;
+	}
+
+	function getReverse(bytes32 _name) view public returns (address) {
+		return entries[_name].reverse;
+	}
+
+	function canReverse(address _data) view public returns (bool) {
+		return bytes(reverses[_data]).length != 0;
+	}
+
+	function reverse(address _data) view public returns (string) {
+		return reverses[_data];
+	}
 
 	// Reservation functions.
-	function reserve(bytes32 _name) when_unreserved(_name) when_fee_paid payable returns (bool success) {
+	function reserve(bytes32 _name) whenUnreserved(_name) whenFeePaid payable public returns (bool success) {
 		entries[_name].owner = msg.sender;
-		Reserved(_name, msg.sender);
+		emit Reserved(_name, msg.sender);
 		return true;
 	}
 
-	function reserved(bytes32 _name) constant returns (bool reserved) {
+	function reserved(bytes32 _name) view public returns (bool) {
 		return entries[_name].owner != 0;
 	}
 
-	function transfer(bytes32 _name, address _to) only_owner_of(_name) returns (bool success) {
+	function transfer(bytes32 _name, address _to) onlyOwnerOf(_name) public returns (bool success) {
 		entries[_name].owner = _to;
-		Transferred(_name, msg.sender, _to);
+		emit Transferred(_name, msg.sender, _to);
 		return true;
 	}
 
-	function drop(bytes32 _name) only_owner_of(_name) returns (bool success) {
+	function drop(bytes32 _name) onlyOwnerOf(_name) public returns (bool success) {
 		delete reverses[entries[_name].reverse];
 		delete entries[_name];
-		Dropped(_name, msg.sender);
+		emit Dropped(_name, msg.sender);
 		return true;
 	}
 
 	// Data admin functions.
-	function setData(bytes32 _name, string _key, bytes32 _value) only_owner_of(_name) returns (bool success) {
+	function setData(bytes32 _name, string _key, bytes32 _value) onlyOwnerOf(_name) public returns (bool success) {
 		entries[_name].data[_key] = _value;
-		DataChanged(_name, _key, _key);
+		emit DataChanged(_name, _key, _key);
 		return true;
 	}
 
-	function setAddress(bytes32 _name, string _key, address _value) only_owner_of(_name) returns (bool success) {
+	function setAddress(bytes32 _name, string _key, address _value) onlyOwnerOf(_name) public returns (bool success) {
 		entries[_name].data[_key] = bytes32(_value);
-		DataChanged(_name, _key, _key);
+		emit DataChanged(_name, _key, _key);
 		return true;
 	}
 
-	function setUint(bytes32 _name, string _key, uint _value) only_owner_of(_name) returns (bool success) {
+	function setUint(bytes32 _name, string _key, uint _value) onlyOwnerOf(_name) public returns (bool success) {
 		entries[_name].data[_key] = bytes32(_value);
-		DataChanged(_name, _key, _key);
+		emit DataChanged(_name, _key, _key);
 		return true;
 	}
 
 	// Reverse registration.
-	function proposeReverse(string _name, address _who) only_owner_of(sha3(_name)) returns (bool success) {
-		var sha3Name = sha3(_name);
-		if (entries[sha3Name].reverse != 0 && sha3(reverses[entries[sha3Name].reverse]) == sha3Name) {
+	function proposeReverse(string _name, address _who) onlyOwnerOf(keccak256(_name)) public returns (bool success) {
+		bytes32 sha3Name = keccak256(_name);
+		if (entries[sha3Name].reverse != 0 && keccak256(reverses[entries[sha3Name].reverse]) == sha3Name) {
 			delete reverses[entries[sha3Name].reverse];
-			ReverseRemoved(_name, entries[sha3Name].reverse);
+			emit ReverseRemoved(_name, entries[sha3Name].reverse);
 		}
 		entries[sha3Name].reverse = _who;
-		ReverseProposed(_name, _who);
+		emit ReverseProposed(_name, _who);
 		return true;
 	}
 
-	function confirmReverse(string _name) when_proposed(_name) returns (bool success) {
+	function confirmReverse(string _name) whenProposed(_name) public returns (bool success) {
 		reverses[msg.sender] = _name;
-		ReverseConfirmed(_name, msg.sender);
+		emit ReverseConfirmed(_name, msg.sender);
 		return true;
 	}
 
-	function confirmReverseAs(string _name, address _who) only_owner returns (bool success) {
+	function confirmReverseAs(string _name, address _who) onlyOwner public returns (bool success) {
 		reverses[_who] = _name;
-		ReverseConfirmed(_name, _who);
+		emit ReverseConfirmed(_name, _who);
 		return true;
 	}
 
-	function removeReverse() {
-		ReverseRemoved(reverses[msg.sender], msg.sender);
-		delete entries[sha3(reverses[msg.sender])].reverse;
+	function removeReverse() public {
+		emit ReverseRemoved(reverses[msg.sender], msg.sender);
+		delete entries[keccak256(reverses[msg.sender])].reverse;
 		delete reverses[msg.sender];
 	}
 
 	// Admin functions for the owner.
-
-	function setFee(uint _amount) only_owner returns (bool) {
+	function setFee(uint _amount) onlyOwner public returns (bool) {
 		fee = _amount;
-		FeeChanged(_amount);
+		emit FeeChanged(_amount);
 		return true;
 	}
 
-	function drain() only_owner returns (bool) {
-		Drained(this.balance);
-		if (!msg.sender.send(this.balance)) throw;
+	function drain() onlyOwner public returns (bool) {
+		emit Drained(address(this).balance);
+		msg.sender.transfer(address(this).balance);
 		return true;
 	}
 
-	modifier when_unreserved(bytes32 _name) { if (entries[_name].owner != 0) return; _; }
-	modifier only_owner_of(bytes32 _name) { if (entries[_name].owner != msg.sender) return; _; }
-	modifier when_proposed(string _name) { if (entries[sha3(_name)].reverse != msg.sender) return; _; }
-	modifier when_fee_paid { if (msg.value < fee) return; _; }
+	modifier whenUnreserved(bytes32 _name) {
+		if (entries[_name].owner != 0)
+			return;
+		_;
+	}
+
+	modifier onlyOwnerOf(bytes32 _name) {
+		if (entries[_name].owner != msg.sender)
+			return;
+		_;
+	}
+
+	modifier whenProposed(string _name) {
+		if (entries[keccak256(_name)].reverse != msg.sender)
+			return;
+		_;
+	}
+
+	modifier whenFeePaid {
+		if (msg.value < fee)
+			return;
+		_;
+	}
 
 	mapping (bytes32 => Entry) entries;
 	mapping (address => string) reverses;

@@ -1,4 +1,4 @@
-//! The SimpleCertifier contract, taken from paritytech/sms-verification.
+//! The SimpleCertifier contract, used by service transaction.
 //!
 //! Copyright 2016 Gavin Wood, Parity Technologies Ltd.
 //!
@@ -19,28 +19,54 @@ pragma solidity ^0.4.7;
 import "./Owned.sol";
 import "./Certifier.sol";
 
+
 contract SimpleCertifier is Owned, Certifier {
-	modifier only_delegate { if (msg.sender != delegate) return; _; }
-	modifier only_certified(address _who) { if (!certs[_who].active) return; _; }
+	modifier onlyDelegate {
+		if (msg.sender != delegate)
+			return;
+		_;
+	}
+
+	modifier onlyCertified(address _who) {
+		if (!certs[_who].active)
+			return;
+		_;
+	}
 
 	struct Certification {
 		bool active;
 		mapping (string => bytes32) meta;
 	}
 
-	function certify(address _who) only_delegate {
+	function certify(address _who) onlyDelegate public {
 		certs[_who].active = true;
-		Confirmed(_who);
+		emit Confirmed(_who);
 	}
-	function revoke(address _who) only_delegate only_certified(_who) {
+
+	function revoke(address _who) onlyDelegate onlyCertified(_who) public {
 		certs[_who].active = false;
-		Revoked(_who);
+		emit Revoked(_who);
 	}
-	function certified(address _who) constant returns (bool) { return certs[_who].active; }
-	function get(address _who, string _field) constant returns (bytes32) { return certs[_who].meta[_field]; }
-	function getAddress(address _who, string _field) constant returns (address) { return address(certs[_who].meta[_field]); }
-	function getUint(address _who, string _field) constant returns (uint) { return uint(certs[_who].meta[_field]); }
-	function setDelegate(address _new) only_owner { delegate = _new; }
+
+	function certified(address _who) view public returns (bool) {
+		return certs[_who].active;
+	}
+
+	function get(address _who, string _field) view public returns (bytes32) {
+		return certs[_who].meta[_field];
+	}
+
+	function getAddress(address _who, string _field) view public returns (address) {
+		return address(certs[_who].meta[_field]);
+	}
+
+	function getUint(address _who, string _field) view public returns (uint) {
+		return uint(certs[_who].meta[_field]);
+	}
+
+	function setDelegate(address _new) onlyOwner public {
+		delegate = _new;
+	}
 
 	mapping (address => Certification) certs;
 	// So that the server posting puzzles doesn't have access to the ETH.
