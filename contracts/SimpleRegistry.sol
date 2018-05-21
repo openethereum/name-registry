@@ -20,7 +20,7 @@ import "./Owned.sol";
 
 
 contract MetadataRegistry {
-	event DataChanged(bytes32 indexed name, string indexed key, string plainKey);
+	event DataChanged(bytes32 indexed name, string key, string plainKey);
 
 	function getData(bytes32 _name, string _key) view public returns (bytes32);
 	function getAddress(bytes32 _name, string _key) view public returns (address);
