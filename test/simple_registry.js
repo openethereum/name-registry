@@ -15,7 +15,8 @@ contract("SimpleRegistry", accounts => {
 
   const address = accounts[0];
   const owner = accounts[0];
-  const name = "awesome";
+  const nameEntry = "awesome";
+  const name = web3.sha3(nameEntry);
 
   it("should allow reserving a new name", async () => {
     const simpleReg = await SimpleRegistry.deployed();
@@ -29,7 +30,7 @@ contract("SimpleRegistry", accounts => {
     const events = await watcher.get();
 
     assert.equal(events.length, 1);
-    assert.equal(web3.toUtf8(events[0].args.name), name);
+    assert.equal(events[0].args.name, name);
     assert.equal(events[0].args.owner, address);
 
     // reserved should be true
@@ -50,7 +51,7 @@ contract("SimpleRegistry", accounts => {
     await simpleReg.setData(name, "A", "dummy");
     let events = await watcher.get();
     assert.equal(events.length, 1);
-    assert.equal(web3.toUtf8(events[0].args.name), name);
+    assert.equal(events[0].args.name, name);
     assert.equal(events[0].args.key, "A");
     assert.equal(events[0].args.plainKey, "A");
 
@@ -65,7 +66,7 @@ contract("SimpleRegistry", accounts => {
     await simpleReg.setAddress(name, "A", address);
     events = await watcher.get();
     assert.equal(events.length, 1);
-    assert.equal(web3.toUtf8(events[0].args.name), name);
+    assert.equal(events[0].args.name, name);
     assert.equal(events[0].args.key, "A");
     assert.equal(events[0].args.plainKey, "A");
 
@@ -80,12 +81,37 @@ contract("SimpleRegistry", accounts => {
     await simpleReg.setUint(name, "A", 100);
     events = await watcher.get();
     assert.equal(events.length, 1);
-    assert.equal(web3.toUtf8(events[0].args.name), name);
+    assert.equal(events[0].args.name, name);
     assert.equal(events[0].args.key, "A");
     assert.equal(events[0].args.plainKey, "A");
 
     data = await simpleReg.getUint(name, "A");
     assert.equal(data, 100);
+  });
+
+  it("should allow owner to propose new reverse address", async () => {
+    const simpleReg = await SimpleRegistry.deployed();
+
+    let watcher = simpleReg.ReverseProposed();
+
+    await simpleReg.proposeReverse(nameEntry, address, { from: address });
+    let events = await watcher.get();
+    assert.equal(events.length, 1);
+    assert.equal(events[0].args.name, nameEntry);
+    assert.equal(events[0].args.reverse, address);
+
+    watcher = simpleReg.ReverseConfirmed();
+    await simpleReg.confirmReverse(nameEntry);
+    events = await watcher.get();
+    assert.equal(events.length, 1);
+    assert.equal(events[0].args.name, nameEntry);
+    assert.equal(events[0].args.reverse, address);
+
+    watcher = simpleReg.ReverseRemoved();
+    await simpleReg.removeReverse();
+    assert.equal(events.length, 1);
+    assert.equal(events[0].args.name, nameEntry);
+    assert.equal(events[0].args.reverse, address);
   });
 
   it("should abort reservation if name is already reserved", async () => {
@@ -135,7 +161,7 @@ contract("SimpleRegistry", accounts => {
 
     const events = await watcher.get();
     assert.equal(events.length, 1);
-    assert.equal(web3.toUtf8(events[0].args.name), name);
+    assert.equal(events[0].args.name, name);
     assert.equal(events[0].args.oldOwner, accounts[0]);
     assert.equal(events[0].args.newOwner, accounts[1]);
 
@@ -176,7 +202,7 @@ contract("SimpleRegistry", accounts => {
 
     const events = await watcher.get();
     assert.equal(events.length, 1);
-    assert.equal(web3.toUtf8(events[0].args.name), name);
+    assert.equal(events[0].args.name, name);
     assert.equal(events[0].args.owner, accounts[1]);
   });
 
