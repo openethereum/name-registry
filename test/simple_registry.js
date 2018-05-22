@@ -94,11 +94,21 @@ contract("SimpleRegistry", accounts => {
 
     let watcher = simpleReg.ReverseProposed();
 
+    await assertThrowsAsync(
+      () => simpleReg.proposeReverse(nameEntry, address, { from: accounts[1] }),
+      "revert",
+    );
+
     await simpleReg.proposeReverse(nameEntry, address, { from: address });
     let events = await watcher.get();
     assert.equal(events.length, 1);
     assert.equal(events[0].args.name, nameEntry);
     assert.equal(events[0].args.reverse, address);
+
+    await assertThrowsAsync(
+      () => simpleReg.confirmReverse(nameEntry, { from: accounts[1] }),
+      "revert",
+    );
 
     watcher = simpleReg.ReverseConfirmed();
     await simpleReg.confirmReverse(nameEntry);
