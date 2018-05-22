@@ -107,6 +107,11 @@ contract("SimpleRegistry", accounts => {
     assert.equal(events[0].args.name, nameEntry);
     assert.equal(events[0].args.reverse, address);
 
+    assert.equal(await simpleReg.canReverse(address), true);
+    assert.equal(await simpleReg.hasReverse(name), true);
+    assert.equal(await simpleReg.getReverse(name), address);
+    assert.equal(await simpleReg.reverse(address), nameEntry);
+
     watcher = simpleReg.ReverseRemoved();
     await simpleReg.removeReverse();
     events = await watcher.get();
