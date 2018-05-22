@@ -109,6 +109,28 @@ contract("SimpleRegistry", accounts => {
 
     watcher = simpleReg.ReverseRemoved();
     await simpleReg.removeReverse();
+    events = await watcher.get();
+    assert.equal(events.length, 1);
+    assert.equal(events[0].args.name, nameEntry);
+    assert.equal(events[0].args.reverse, address);
+  });
+
+  it("should allow re-registration of reverse address and owner forced confirmation", async () => {
+    const simpleReg = await SimpleRegistry.deployed();
+
+    await simpleReg.proposeReverse(nameEntry, address, { from: address });
+    await simpleReg.confirmReverseAs(nameEntry, address);
+
+    let proposedWatcher = simpleReg.ReverseProposed();
+    let removedWatcher = simpleReg.ReverseRemoved();
+
+    await simpleReg.proposeReverse(nameEntry, accounts[1]);
+    let events = await proposedWatcher.get();
+    assert.equal(events.length, 1);
+    assert.equal(events[0].args.name, nameEntry);
+    assert.equal(events[0].args.reverse, accounts[1]);
+
+    events = await removedWatcher.get();
     assert.equal(events.length, 1);
     assert.equal(events[0].args.name, nameEntry);
     assert.equal(events[0].args.reverse, address);
