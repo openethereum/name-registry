@@ -54,6 +54,9 @@ contract("SimpleRegistry", accounts => {
     assert.equal(events[0].args.key, "A");
     assert.equal(events[0].args.plainKey, "A");
 
+    let data = await simpleReg.getData(name, "A");
+    assert.equal(web3.toUtf8(data), "dummy");
+
     await assertThrowsAsync(
       () => simpleReg.setAddress(name, "A", address, { from: accounts[1] }),
       "revert",
@@ -66,6 +69,9 @@ contract("SimpleRegistry", accounts => {
     assert.equal(events[0].args.key, "A");
     assert.equal(events[0].args.plainKey, "A");
 
+    data = await simpleReg.getAddress(name, "A");
+    assert.equal(data, address);
+
     await assertThrowsAsync(
       () => simpleReg.setUint(name, "A", 100, { from: accounts[1] }),
       "revert",
@@ -77,6 +83,9 @@ contract("SimpleRegistry", accounts => {
     assert.equal(web3.toUtf8(events[0].args.name), name);
     assert.equal(events[0].args.key, "A");
     assert.equal(events[0].args.plainKey, "A");
+
+    data = await simpleReg.getUint(name, "A");
+    assert.equal(data, 100);
   });
 
   it("should abort reservation if name is already reserved", async () => {
