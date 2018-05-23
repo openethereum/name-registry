@@ -309,5 +309,10 @@ contract("SimpleRegistry", accounts => {
       () => simpleReg.drop(name),
       "revert",
     );
+
+    await assertThrowsAsync(
+      () => simpleReg.confirmReverse(nameEntry),
+      "revert",
+    );
   });
 });
