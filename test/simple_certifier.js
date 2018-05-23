@@ -40,4 +40,12 @@ contract("SimpleRegistry", accounts => {
        "revert"
      );
    });
+
+  it("should allow set owner", async () => {
+    const cert = await SimpleCertifier.deployed();
+
+    assert.equal(await cert.owner(), accounts[0]);
+    await cert.setOwner(accounts[1]);
+    assert.equal(await cert.owner(), accounts[1]);
+  });
 });
