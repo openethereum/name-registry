@@ -27,7 +27,17 @@ contract("SimpleRegistry", accounts => {
      await cert.certify(accounts[1]);
      assert.equal(await cert.certified(accounts[1]), true);
 
+     assertThrowsAsync(
+       () => cert.revoke(accounts[1], { from: accounts[1] }),
+       "revert"
+     );
+
      await cert.revoke(accounts[1]);
      assert.equal(await cert.certified(accounts[1]), false);
+
+     assertThrowsAsync(
+       () => cert.revoke(accounts[1]),
+       "revert"
+     );
    });
 });
