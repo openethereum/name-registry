@@ -52,7 +52,7 @@ contract SimpleCertifier is Owned, Certifier {
 		return certs[_who].active;
 	}
 
-	function get(address _who, string _field) view public returns (bytes32) {
+	function getData(address _who, string _field) view public returns (bytes32) {
 		return certs[_who].meta[_field];
 	}
 
