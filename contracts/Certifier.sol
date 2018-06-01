@@ -14,11 +14,15 @@
 //! See the License for the specific language governing permissions and
 //! limitations under the License.
 
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.22;
 
 
-contract Certifier {
+interface Certifier {
 	event Confirmed(address indexed who);
 	event Revoked(address indexed who);
-	function certified(address _who) view public returns (bool);
+
+	function certified(address _who)
+		external
+		view
+		returns (bool);
 }
