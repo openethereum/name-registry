@@ -9,3 +9,18 @@
 [coveralls-url]: https://coveralls.io/github/parity-contracts/name-registry?branch=master
 
 Registry used by Parity Name Registry and Certifier used by service transaction contract.
+
+## Getting started
+
+This project uses the [Truffle](http://truffleframework.com/) framework. To install the required
+dependencies run:
+
+```
+yarn install
+```
+
+To run the test suite:
+
+```
+yarn test
+```
