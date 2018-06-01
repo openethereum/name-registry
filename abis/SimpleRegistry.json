@@ -69,7 +69,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "name": "name",
         "type": "string"
       },
@@ -86,7 +86,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "name": "name",
         "type": "string"
       },
@@ -103,7 +103,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "name": "name",
         "type": "string"
       },
@@ -212,170 +212,6 @@
     "type": "event"
   },
   {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_name",
-        "type": "bytes32"
-      },
-      {
-        "name": "_key",
-        "type": "string"
-      }
-    ],
-    "name": "getData",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_name",
-        "type": "bytes32"
-      },
-      {
-        "name": "_key",
-        "type": "string"
-      }
-    ],
-    "name": "getAddress",
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_name",
-        "type": "bytes32"
-      },
-      {
-        "name": "_key",
-        "type": "string"
-      }
-    ],
-    "name": "getUint",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_name",
-        "type": "bytes32"
-      }
-    ],
-    "name": "getOwner",
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_name",
-        "type": "bytes32"
-      }
-    ],
-    "name": "hasReverse",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_name",
-        "type": "bytes32"
-      }
-    ],
-    "name": "getReverse",
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_data",
-        "type": "address"
-      }
-    ],
-    "name": "canReverse",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_data",
-        "type": "address"
-      }
-    ],
-    "name": "reverse",
-    "outputs": [
-      {
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "constant": false,
     "inputs": [
       {
@@ -392,25 +228,6 @@
     ],
     "payable": true,
     "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_name",
-        "type": "bytes32"
-      }
-    ],
-    "name": "reserved",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -641,6 +458,189 @@
     ],
     "payable": false,
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_name",
+        "type": "bytes32"
+      },
+      {
+        "name": "_key",
+        "type": "string"
+      }
+    ],
+    "name": "getData",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_name",
+        "type": "bytes32"
+      },
+      {
+        "name": "_key",
+        "type": "string"
+      }
+    ],
+    "name": "getAddress",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_name",
+        "type": "bytes32"
+      },
+      {
+        "name": "_key",
+        "type": "string"
+      }
+    ],
+    "name": "getUint",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_name",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getOwner",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_name",
+        "type": "bytes32"
+      }
+    ],
+    "name": "hasReverse",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_name",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getReverse",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_data",
+        "type": "address"
+      }
+    ],
+    "name": "canReverse",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_data",
+        "type": "address"
+      }
+    ],
+    "name": "reverse",
+    "outputs": [
+      {
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_name",
+        "type": "bytes32"
+      }
+    ],
+    "name": "reserved",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
     "type": "function"
   }
 ]
