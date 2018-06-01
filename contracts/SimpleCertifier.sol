@@ -22,20 +22,17 @@ import "./Certifier.sol";
 
 contract SimpleCertifier is Owned, Certifier {
 	modifier onlyDelegate {
-		if (msg.sender != delegate)
-			return;
+		require(msg.sender == delegate);
 		_;
 	}
 
 	modifier onlyCertified(address _who) {
-		if (!certs[_who].active)
-			return;
+		require(certs[_who].active);
 		_;
 	}
 
 	struct Certification {
 		bool active;
-		mapping (string => bytes32) meta;
 	}
 
 	function certify(address _who) onlyDelegate public {
@@ -50,18 +47,6 @@ contract SimpleCertifier is Owned, Certifier {
 
 	function certified(address _who) view public returns (bool) {
 		return certs[_who].active;
-	}
-
-	function getData(address _who, string _field) view public returns (bytes32) {
-		return certs[_who].meta[_field];
-	}
-
-	function getAddress(address _who, string _field) view public returns (address) {
-		return address(certs[_who].meta[_field]);
-	}
-
-	function getUint(address _who, string _field) view public returns (uint) {
-		return uint(certs[_who].meta[_field]);
 	}
 
 	function setDelegate(address _new) onlyOwner public {

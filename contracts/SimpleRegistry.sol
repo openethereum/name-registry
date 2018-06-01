@@ -20,7 +20,7 @@ import "./Owned.sol";
 
 
 contract MetadataRegistry {
-	event DataChanged(bytes32 indexed name, string indexed key, string plainKey);
+	event DataChanged(bytes32 indexed name, string key, string plainKey);
 
 	function getData(bytes32 _name, string _key) view public returns (bytes32);
 	function getAddress(bytes32 _name, string _key) view public returns (address);
@@ -38,8 +38,8 @@ contract OwnerRegistry {
 
 
 contract ReverseRegistry {
-	event ReverseConfirmed(string indexed name, address indexed reverse);
-	event ReverseRemoved(string indexed name, address indexed reverse);
+	event ReverseConfirmed(string name, address indexed reverse);
+	event ReverseRemoved(string name, address indexed reverse);
 
 	function hasReverse(bytes32 _name) view public returns (bool);
 	function getReverse(bytes32 _name) view public returns (address);
@@ -58,7 +58,7 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 
 	event Drained(uint amount);
 	event FeeChanged(uint amount);
-	event ReverseProposed(string indexed name, address indexed reverse);
+	event ReverseProposed(string name, address indexed reverse);
 
 	// Registry functions.
 	function getData(bytes32 _name, string _key) whenEntryRaw(_name) view public returns (bytes32) {
