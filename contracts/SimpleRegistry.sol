@@ -17,35 +17,7 @@
 pragma solidity ^0.4.0;
 
 import "./Owned.sol";
-
-
-contract MetadataRegistry {
-	event DataChanged(bytes32 indexed name, string key, string plainKey);
-
-	function getData(bytes32 _name, string _key) view public returns (bytes32);
-	function getAddress(bytes32 _name, string _key) view public returns (address);
-	function getUint(bytes32 _name, string _key) view public returns (uint);
-}
-
-
-contract OwnerRegistry {
-	event Reserved(bytes32 indexed name, address indexed owner);
-	event Transferred(bytes32 indexed name, address indexed oldOwner, address indexed newOwner);
-	event Dropped(bytes32 indexed name, address indexed owner);
-
-	function getOwner(bytes32 _name) view public returns (address);
-}
-
-
-contract ReverseRegistry {
-	event ReverseConfirmed(string name, address indexed reverse);
-	event ReverseRemoved(string name, address indexed reverse);
-
-	function hasReverse(bytes32 _name) view public returns (bool);
-	function getReverse(bytes32 _name) view public returns (address);
-	function canReverse(address _data) view public returns (bool);
-	function reverse(address _data) view public returns (string);
-}
+import "./Registry.sol";
 
 
 contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegistry {
@@ -61,37 +33,37 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 	event ReverseProposed(string name, address indexed reverse);
 
 	// Registry functions.
-	function getData(bytes32 _name, string _key) whenEntryRaw(_name) view public returns (bytes32) {
+	function getData(bytes32 _name, string _key) whenEntryRaw(_name) view external returns (bytes32) {
 		return entries[_name].data[_key];
 	}
 
-	function getAddress(bytes32 _name, string _key) whenEntryRaw(_name) view public returns (address) {
+	function getAddress(bytes32 _name, string _key) whenEntryRaw(_name) view external returns (address) {
 		return address(entries[_name].data[_key]);
 	}
 
-	function getUint(bytes32 _name, string _key) whenEntryRaw(_name) view public returns (uint) {
+	function getUint(bytes32 _name, string _key) whenEntryRaw(_name) view external returns (uint) {
 		return uint(entries[_name].data[_key]);
 	}
 
 	// OwnerRegistry function.
-	function getOwner(bytes32 _name) whenEntryRaw(_name) view public returns (address) {
+	function getOwner(bytes32 _name) whenEntryRaw(_name) view external returns (address) {
 		return entries[_name].owner;
 	}
 
 	// ReversibleRegistry functions.
-	function hasReverse(bytes32 _name) whenEntryRaw(_name) view public returns (bool) {
+	function hasReverse(bytes32 _name) whenEntryRaw(_name) view external returns (bool) {
 		return entries[_name].reverse != 0;
 	}
 
-	function getReverse(bytes32 _name) whenEntryRaw(_name) view public returns (address) {
+	function getReverse(bytes32 _name) whenEntryRaw(_name) view external returns (address) {
 		return entries[_name].reverse;
 	}
 
-	function canReverse(address _data) view public returns (bool) {
+	function canReverse(address _data) view external returns (bool) {
 		return bytes(reverses[_data]).length != 0;
 	}
 
-	function reverse(address _data) view public returns (string) {
+	function reverse(address _data) view external returns (string) {
 		return reverses[_data];
 	}
 
