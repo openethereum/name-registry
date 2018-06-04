@@ -14,13 +14,22 @@
 //! See the License for the specific language governing permissions and
 //! limitations under the License.
 
-pragma solidity ^0.4.7;
+pragma solidity ^0.4.22;
 
-import "./Owned.sol";
 import "./Certifier.sol";
+import "./Owned.sol";
 
 
 contract SimpleCertifier is Owned, Certifier {
+	struct Certification {
+		bool active;
+	}
+
+	mapping (address => Certification) certs;
+
+	// So that the server posting puzzles doesn't have access to the ETH.
+	address public delegate = msg.sender;
+
 	modifier onlyDelegate {
 		require(msg.sender == delegate);
 		_;
@@ -31,29 +40,35 @@ contract SimpleCertifier is Owned, Certifier {
 		_;
 	}
 
-	struct Certification {
-		bool active;
-	}
-
-	function certify(address _who) onlyDelegate public {
+	function certify(address _who)
+		external
+		onlyDelegate
+	{
 		certs[_who].active = true;
 		emit Confirmed(_who);
 	}
 
-	function revoke(address _who) onlyDelegate onlyCertified(_who) public {
+	function revoke(address _who)
+		external
+		onlyDelegate
+		onlyCertified(_who)
+	{
 		certs[_who].active = false;
 		emit Revoked(_who);
 	}
 
-	function certified(address _who) view public returns (bool) {
-		return certs[_who].active;
-	}
-
-	function setDelegate(address _new) onlyOwner public {
+	function setDelegate(address _new)
+		external
+		onlyOwner
+	{
 		delegate = _new;
 	}
 
-	mapping (address => Certification) certs;
-	// So that the server posting puzzles doesn't have access to the ETH.
-	address public delegate = msg.sender;
+	function certified(address _who)
+		external
+		view
+		returns (bool)
+	{
+		return certs[_who].active;
+	}
 }
