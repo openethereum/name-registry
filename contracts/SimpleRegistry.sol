@@ -14,7 +14,7 @@
 //! See the License for the specific language governing permissions and
 //! limitations under the License.
 
-pragma solidity ^0.4.22;
+pragma solidity ^0.4.24;
 
 import "./Owned.sol";
 import "./Registry.sol";
@@ -48,12 +48,12 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 	}
 
 	modifier whenProposed(string _name) {
-		require(entries[keccak256(_name)].reverse == msg.sender);
+		require(entries[keccak256(bytes(_name))].reverse == msg.sender);
 		_;
 	}
 
 	modifier whenEntry(string _name) {
-		require(!entries[keccak256(_name)].deleted);
+		require(!entries[keccak256(bytes(_name))].deleted);
 		_;
 	}
 
@@ -142,11 +142,11 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 	function proposeReverse(string _name, address _who)
 		external
 		whenEntry(_name)
-		onlyOwnerOf(keccak256(_name))
+		onlyOwnerOf(keccak256(bytes(_name)))
 		returns (bool success)
 	{
-		bytes32 sha3Name = keccak256(_name);
-		if (entries[sha3Name].reverse != 0 && keccak256(reverses[entries[sha3Name].reverse]) == sha3Name) {
+		bytes32 sha3Name = keccak256(bytes(_name));
+		if (entries[sha3Name].reverse != 0 && keccak256(bytes(reverses[entries[sha3Name].reverse])) == sha3Name) {
 			delete reverses[entries[sha3Name].reverse];
 			emit ReverseRemoved(_name, entries[sha3Name].reverse);
 		}
@@ -182,7 +182,7 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 		whenEntry(reverses[msg.sender])
 	{
 		emit ReverseRemoved(reverses[msg.sender], msg.sender);
-		delete entries[keccak256(reverses[msg.sender])].reverse;
+		delete entries[keccak256(bytes(reverses[msg.sender]))].reverse;
 		delete reverses[msg.sender];
 	}
 
