@@ -180,6 +180,7 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 	function removeReverse()
 		external
 		whenEntry(reverses[msg.sender])
+		onlyOwnerOf(keccak256(bytes(reverses[msg.sender])))
 	{
 		emit ReverseRemoved(reverses[msg.sender], msg.sender);
 		delete entries[keccak256(bytes(reverses[msg.sender]))].reverse;
