@@ -6,7 +6,7 @@
 //! you may not use this file except in compliance with the License.
 //! You may obtain a copy of the License at
 //!
-//!     http://www.apache.org/licenses/LICENSE-2.0
+//!	    http://www.apache.org/licenses/LICENSE-2.0
 //!
 //! Unless required by applicable law or agreed to in writing, software
 //! distributed under the License is distributed on an "AS IS" BASIS,
@@ -53,7 +53,10 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 	}
 
 	modifier whenEntry(string _name) {
-		require(!entries[keccak256(bytes(_name))].deleted);
+		require(
+			!entries[keccak256(bytes(_name))].deleted &&
+			entries[keccak256(bytes(_name))].owner != address(0)
+		);
 		_;
 	}
 
@@ -98,7 +101,10 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 		onlyOwnerOf(_name)
 		returns (bool success)
 	{
-		delete reverses[entries[_name].reverse];
+		if (keccak256(bytes(reverses[entries[_name].reverse])) == _name) {
+			emit ReverseRemoved(reverses[entries[_name].reverse], entries[_name].reverse);
+			delete reverses[entries[_name].reverse];
+		}
 		entries[_name].deleted = true;
 		emit Dropped(_name, msg.sender);
 		return true;

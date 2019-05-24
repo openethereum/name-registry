@@ -151,6 +151,56 @@ contract("SimpleRegistry", accounts => {
     assert.equal(events[0].args.reverse, address);
   });
 
+  it("should delete confirmed reverse entry on drop", async () => {
+    const simpleReg = await SimpleRegistry.deployed();
+    const dropWatcher = simpleReg.Dropped();
+    const removedWatcher = simpleReg.ReverseRemoved();
+
+    const droppableNameEntry = "todrop";
+    const droppableName = web3.sha3(droppableNameEntry);
+
+    await simpleReg.reserve(droppableName, { value: web3.toWei("1", "ether") });
+    await simpleReg.proposeReverse(droppableNameEntry, address, { from: address });
+    await simpleReg.confirmReverse(droppableNameEntry, { from: address });
+    await simpleReg.drop(droppableName, { from: address });
+
+    const removedEvents = await removedWatcher.get();
+    assert.equal(removedEvents.length, 1);
+    assert.equal(removedEvents[0].args.name, droppableNameEntry);
+    assert.equal(removedEvents[0].args.reverse, address);
+
+    const dropEvents = await dropWatcher.get();
+    assert.equal(dropEvents.length, 1);
+    assert.equal(dropEvents[0].args.name, droppableName);
+    assert.equal(dropEvents[0].args.owner, address);
+  });
+
+  it("should not allow to delete others' reverse entry with a drop", async () => {
+    const simpleReg = await SimpleRegistry.deployed();
+    const dropWatcher = simpleReg.Dropped();
+
+    const victimNameEntry = "victim";
+    const victimName = web3.sha3(victimNameEntry);
+
+    await simpleReg.reserve(victimName, { value: web3.toWei("1", "ether") });
+    await simpleReg.proposeReverse(victimNameEntry, address, { from: address });
+    await simpleReg.confirmReverse(victimNameEntry, { from: address });
+
+    const attackerNameEntry = "attacker";
+    const attackerName = web3.sha3(attackerNameEntry);
+
+    await simpleReg.reserve(attackerName, { value: web3.toWei("1", "ether"), from: accounts[2] });
+    await simpleReg.proposeReverse(attackerNameEntry, address, { from: accounts[2] });
+    await simpleReg.drop(attackerName, { from: accounts[2] });
+
+    const events = await dropWatcher.get();
+    assert.equal(events.length, 1);
+    assert.equal(events[0].args.name, attackerName);
+    assert.equal(events[0].args.owner, accounts[2]);
+
+    assert.equal(await simpleReg.getReverse(victimName), address);
+  });
+
   it("should abort reservation if name is already reserved", async () => {
     const simpleReg = await SimpleRegistry.deployed();
 
