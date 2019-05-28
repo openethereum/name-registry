@@ -63,7 +63,8 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 	modifier whenEntryRaw(bytes32 _name) {
 		require(
 			!entries[_name].deleted &&
-			entries[_name].owner != address(0));
+			entries[_name].owner != address(0)
+		);
 		_;
 	}
 
