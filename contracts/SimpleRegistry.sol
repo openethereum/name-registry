@@ -38,7 +38,7 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 	uint public fee = 1 ether;
 
 	modifier whenUnreserved(bytes32 _name) {
-		require(entries[_name].owner == 0);
+		require(!entries[_name].deleted && entries[_name].owner == 0);
 		_;
 	}
 
@@ -53,12 +53,18 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 	}
 
 	modifier whenEntry(string _name) {
-		require(!entries[keccak256(bytes(_name))].deleted);
+		require(
+			!entries[keccak256(bytes(_name))].deleted &&
+			entries[keccak256(bytes(_name))].owner != address(0)
+		);
 		_;
 	}
 
 	modifier whenEntryRaw(bytes32 _name) {
-		require(!entries[_name].deleted);
+		require(
+			!entries[_name].deleted &&
+			entries[_name].owner != address(0)
+		);
 		_;
 	}
 
@@ -71,7 +77,6 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 	function reserve(bytes32 _name)
 		external
 		payable
-		whenEntryRaw(_name)
 		whenUnreserved(_name)
 		whenFeePaid
 		returns (bool success)
@@ -98,7 +103,10 @@ contract SimpleRegistry is Owned, MetadataRegistry, OwnerRegistry, ReverseRegist
 		onlyOwnerOf(_name)
 		returns (bool success)
 	{
-		delete reverses[entries[_name].reverse];
+		if (keccak256(bytes(reverses[entries[_name].reverse])) == _name) {
+			emit ReverseRemoved(reverses[entries[_name].reverse], entries[_name].reverse);
+			delete reverses[entries[_name].reverse];
+		}
 		entries[_name].deleted = true;
 		emit Dropped(_name, msg.sender);
 		return true;
